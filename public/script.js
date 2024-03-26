@@ -12,7 +12,7 @@ const messageDiv = document.getElementById('message');
 var mediaDownloadName = '';
 var mediaDownloadPath = '';
 
-// İlk mediaList fetch
+// First mediaList fetch
 fetch('/files')
     .then(response => response.json())
     .then(data => {
@@ -44,7 +44,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     const dosya = dosyaInput.files[0];
 
     if (!dosya) {
-        showMessage('Lütfen bir dosya seçin.', 'error');
+        showMessage('Please select a file.', 'error');
         return;
     }
 
@@ -56,7 +56,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload');
 
-    // Yükleme işlemi ilerledikçe progress olayını dinleyerek yüzdeyi güncelle
+    // Listen upload progress and update
     xhr.upload.addEventListener('progress', function (event) {
         if (event.lengthComputable) {
             const percentComplete = (event.loaded / event.total) * 100;
@@ -66,14 +66,14 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
     xhr.onload = function () {
         if (xhr.status === 200) {
-            showMessage('Dosya başarıyla yüklendi.', 'success');
+            showMessage('File uploaded succsessfully.', 'success');
         } else {
-            showMessage('Dosya yüklenirken bir hata oluştu.', 'error');
+            showMessage('File could not be uploaded.', 'error');
         }
     };
 
     xhr.onerror = function () {
-        showMessage('Dosya yüklenirken bir hata oluştu.', 'error');
+        showMessage('There is an error while uploading.', 'error');
     };
 
     xhr.send(formData);
@@ -98,9 +98,9 @@ function sliceUp(path) {
 async function fetchFiles(folderName) {
     mediaList.innerHTML = '';
 
-    //Klasör ismi
+    // Folder name
     const mediaFolder = document.createElement('div');
-    mediaFolder.textContent = "Media/" + folderName.replace('\\', '/') + " Klasörü";
+    mediaFolder.textContent = "Media/" + folderName.replace('\\', '/') + " Folder";
     mediaFolder.id = 'media-folder-name';
     mediaList.appendChild(mediaFolder);
 
@@ -124,7 +124,6 @@ async function fetchFiles(folderName) {
         mediaList.appendChild(listItem);
     });
 }
-
 
 function getFileExtension(filename) {
     return filename.split('.').pop().toLowerCase();
@@ -159,7 +158,7 @@ function viewMedia(filename) {
         video.src = `/media/${filename}`;
         video.controls = true;
         popupItem.appendChild(video);
-    } else if (filename.endsWith('.ts')) {
+    } else if (filename.endsWith('.ts')) { // (Not works for now)
         const video = document.createElement('video');
         video.controls = true;
         video.className = "video-js vjs-default-skin";
@@ -170,7 +169,7 @@ function viewMedia(filename) {
         var player = videojs('video', {
             fluid: false,
             sources: [
-                { src: `/media/${filename}`, type: 'video/mp2t' } // .ts dosyası için type belirtmek önemli
+                { src: `/media/${filename}`, type: 'video/mp2t' }
             ]
         });
     } else if (filename.endsWith('.mp3') || filename.endsWith('.ogg')) {
@@ -189,7 +188,7 @@ function openPopup(fileName, filePath) {
     popup.style.display = "flex";
     popupName.innerHTML = `<p>${fileName}</p>`;
     mediaDownloadName = fileName;
-    mediaDownloadPath = sliceUp(filePath); // aşağıda birdaha yazmak istemedim aynısını
+    mediaDownloadPath = sliceUp(filePath);
     viewMedia(mediaDownloadPath);
 }
 

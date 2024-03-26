@@ -7,35 +7,36 @@ const multer = require('multer');
 const app = express();
 const port = 3000;
 
-// Tüm isteklere CORS izinlerini ekleyin (sadece local için güvenli)
+// Allow CORS permissions to all requests
+// Safe for local use only !
 app.use(cors());
 
 // Public
 const publicPath = path.join(__dirname, 'public');
-// Media klasörü belirlendi
+// Media folder defined
 const mediaPath = path.join(publicPath, 'media');
-// Dosyaların yükleneceği klasör belirlendi
+// Upload folder defined
 const uploadDir = path.join(mediaPath, 'Uploads');
 
-// Public klasörünü statik olarak sun
+// Public folder for static use
 app.use(express.static(publicPath));
 
-// Eğer Media klasörü yoksa, oluştur
+// If there is no media folder, create it
 if (!fs.existsSync(mediaPath)) {
     fs.mkdirSync(mediaPath);
 }
 
-// Eğer Uploads klasörü yoksa, oluştur
+// If there is no upload folder, create it
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
-  }
+}
 
-// Ana sayfa için route
+// Root location for home page
 app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-// Dosya listesini al ve klasörleri diğer dosya türlerinden önce tutarak sırala
+// Get file list and sort folders before other file types
 function sortFiles(files) {
     return files.sort((a, b) => {
         if (a.isDirectory && !b.isDirectory) {
@@ -48,7 +49,7 @@ function sortFiles(files) {
     });
 }
 
-// Klasör içeriğini listele
+// List folder contents
 function listFiles(directory) {
     const files = fs.readdirSync(directory, { withFileTypes: true });
 
@@ -62,7 +63,7 @@ function listFiles(directory) {
     });
 }
 
-// Media klasörü dosyaları
+// Files inside media folder
 app.get('/files', (req, res) => {
     const files = listFiles(mediaPath);
     const sortedFiles = sortFiles(files);
@@ -70,7 +71,7 @@ app.get('/files', (req, res) => {
     res.send(sortedFiles);
 });
 
-// Klasör içeriğini dinleme
+// Get the contents of the desired folder
 app.get('/browse/:folder/:subfolder?', (req, res) => {
     const folderPath = req.params.subfolder
         ? path.join(__dirname, 'public/media', req.params.folder, req.params.subfolder)
@@ -82,32 +83,27 @@ app.get('/browse/:folder/:subfolder?', (req, res) => {
     res.send(sortedFiles);
 });
 
-// Dosya yükleme için multer ayarları
+// multer settings for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, uploadDir);
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-      cb(null, `${Date.now()}_${file.originalname}`);
+        cb(null, `${Date.now()}_${file.originalname}`);
     }
-  });
-  
-  const upload = multer({ storage: storage });
-  
-  // Ana sayfa
-  app.get('/', (req, res) => {
-    res.send('Dosya Yükleme Projesine Hoş Geldiniz!');
-  });
-  
-  // Dosya yükleme endpoint'i
-  app.post('/upload', upload.single('dosya'), (req, res) => {
-    if (!req.file) {
-      return res.status(400).send('Dosya yüklenemedi.');
-    }
-    res.send('Dosya başarıyla yüklendi.');
-  });
+});
 
-// Server'ı dinle
+const upload = multer({ storage: storage });
+
+// File upload endpoint
+app.post('/upload', upload.single('dosya'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('The file could not be uploaded.');
+    }
+    res.send('The file has been uploaded successfully.');
+});
+
+// Listens server
 app.listen(port, () => {
-    console.log(`Uygulama http://localhost:${port} adresinde çalışıyor.`);
+    console.log(`The server runs at http://localhost:${port}.`);
 });
