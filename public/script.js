@@ -143,43 +143,34 @@ function getIcon(fileExtension) {
         case 'jpeg':
         case 'png':
             return 'icons/image-icon.svg';
-            case 'txt':
+        case 'txt':
             return 'icons/file-icon.svg'
         default:
             return 'icons/folder-icon.svg';
     }
 }
 
-function viewMedia(filename) {
+function viewMedia(filePath) {
     popupItem.innerHTML = '';
 
-    if (filename.endsWith('.mp4') || filename.endsWith('.webm') || filename.endsWith('.mkv')) {
-        const video = document.createElement('video');
-        video.src = `/media/${filename}`;
+    if (filePath.endsWith('.mp4') || filePath.endsWith('.webm') || filePath.endsWith('.mkv') || filePath.endsWith('.ts')) {
+        /*const video = document.createElement('video'); // old video system
+        video.src = `/media/${filepath}`;
         video.controls = true;
+        video.type = "video/mp4"
+        popupItem.appendChild(video); */
+        const video = document.createElement('div');
+        video.className = 'artplayer';
         popupItem.appendChild(video);
-    } else if (filename.endsWith('.ts')) { // (Not works for now)
-        const video = document.createElement('video');
-        video.controls = true;
-        video.className = "video-js vjs-default-skin";
-        video.id = "video";
-        //video.src = `/media/${filename}`;
-        popupItem.appendChild(video);
-
-        var player = videojs('video', {
-            fluid: false,
-            sources: [
-                { src: `/media/${filename}`, type: 'video/mp2t' }
-            ]
-        });
-    } else if (filename.endsWith('.mp3') || filename.endsWith('.ogg')) {
+        playArtplayer(filePath);
+    } else if (filePath.endsWith('.mp3') || filePath.endsWith('.ogg')) {
         const audio = document.createElement('audio');
-        audio.src = `/media/${filename}`;
+        audio.src = `/media/${filePath}`;
         audio.controls = true;
         popupItem.appendChild(audio);
-    } else if (filename.endsWith('.jpg') || filename.endsWith('.jpeg') || filename.endsWith('.svg')) {
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.svg')) {
         const image = document.createElement('img');
-        image.src = `/media/${filename}`;
+        image.src = `/media/${filePath}`;
         popupItem.appendChild(image);
     }
 }
@@ -195,6 +186,8 @@ function openPopup(fileName, filePath) {
 function closePopup() {
     popup.style.display = "none";
     popupItem.innerHTML = '';
+    mediaDownloadName = '';
+    mediaDownloadPath = '';
 }
 
 function mediaDownload() {
@@ -203,4 +196,77 @@ function mediaDownload() {
     downloadLink.href = `/media/${mediaDownloadPath}`;
     downloadLink.download = mediaDownloadName;
     downloadLink.click();
+}
+
+function playArtplayer(filePath) {
+    let newPath = 'media\\' + filePath;
+    let subGeneral = newPath.replace(/\.[^.]+$/, '.srt');
+    let subEn = newPath.replace(/\.[^.]+$/, '.en.srt');
+    let subTr = newPath.replace(/\.[^.]+$/, '.tr.srt');
+    var art = new Artplayer({
+        container: '.artplayer',
+        url: newPath,
+        volume: 1.0,
+        isLive: false,
+        muted: false,
+        autoplay: false,
+        pip: true,
+        autoSize: true,
+        autoMini: true,
+        screenshot: true,
+        setting: true,
+        loop: true,
+        flip: true,
+        playbackRate: true,
+        aspectRatio: true,
+        fullscreen: true,
+        fullscreenWeb: true,
+        subtitleOffset: true,
+        miniProgressBar: false,
+        mutex: true,
+        backdrop: true,
+        playsInline: true,
+        autoPlayback: true,
+        airplay: true,
+        theme: '#23ade5',
+        settings: [
+            {
+                width: 200,
+                html: 'Subtitle',
+                tooltip: 'Bilingual',
+                icon: '<img width="22" heigth="22" src="/icons/subtitle-icon.svg">',
+                selector: [
+                    {
+                        html: 'Display',
+                        tooltip: 'Show',
+                        switch: true,
+                        onSwitch: function (item) {
+                            item.tooltip = item.switch ? 'Hide' : 'Show';
+                            art.subtitle.show = !item.switch;
+                            return !item.switch;
+                        },
+                    },
+                    {
+                        default: true,
+                        html: 'Bilingual',
+                        url: subGeneral,
+                    },
+                    {
+                        html: 'English',
+                        url: subEn,
+                    },
+                    {
+                        html: 'Türkçe',
+                        url: subTr,
+                    },
+                ],
+                onSelect: function (item) {
+                    art.subtitle.switch(item.url, {
+                        name: item.html,
+                    });
+                    return item.html;
+                },
+            },
+        ],
+    });
 }
