@@ -8,4 +8,4 @@ As the application is Node.js-based, you can start it by running the command "no
 Through the application, you can directly upload videos, images, music, or any other content from your devices. Alternatively, you can place any desired files or folders into the "public/media" directory within the application's file structure.
 While the server is running, you can view the uploaded files directly through the browser, especially videos, images, and music.
 ## While Working
-![alt text](https://github.com/merteren97/MediaShare/blob/main/1.png?raw=true)
+![alt text](https://github.com/merteren97/MediaShare/blob/main/image.png?raw=true)
